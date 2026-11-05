@@ -7,7 +7,8 @@ import json
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from database.models import AnswerVault
+from database.models import AnswerVault, CandidateInformationLibrary
+from database.repositories import get_candidate_information_library
 
 
 SENSITIVE_TERMS = ("authorized", "sponsor", "visa", "criminal", "disability", "gender", "salary", "relocat", "citizenship")
@@ -37,8 +38,17 @@ class QuestionRequest:
 
 
 class AnswerManager:
-    def lookup(self, session: Session, question: str) -> AnswerVault | None:
-        return session.scalar(select(AnswerVault).where(AnswerVault.normalized_question == normalize_question(question), AnswerVault.verified.is_(True)))
+    def lookup(self, session: Session, question: str) -> str | None:
+        norm = normalize_question(question)
+        # 1. Check CandidateInformationLibrary first
+        lib_item = get_candidate_information_library(session, norm)
+        if lib_item and lib_item.exact_answer:
+            return lib_item.exact_answer
+        # 2. Check AnswerVault
+        vault_item = session.scalar(select(AnswerVault).where(AnswerVault.normalized_question == norm, AnswerVault.verified.is_(True)))
+        if vault_item and vault_item.answer:
+            return vault_item.answer
+        return None
 
     def save(self, session: Session, question: str, answer: str, category: str, verified: bool = True) -> AnswerVault:
         normalized = normalize_question(question)
@@ -47,10 +57,10 @@ class AnswerManager:
             item = AnswerVault(normalized_question=normalized, question=question, answer=answer, category=category, verified=verified); session.add(item)
         else:
             item.answer, item.category, item.verified = answer, category, verified
+        session.flush()
         return item
 
     def resolve(self, session: Session, request: QuestionRequest) -> str | None:
         if request.category in {"sensitive", "legal"}:
             return None
-        item = self.lookup(session, request.question)
-        return item.answer if item else None
+        return self.lookup(session, request.question)

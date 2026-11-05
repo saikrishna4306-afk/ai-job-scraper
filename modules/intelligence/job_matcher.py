@@ -19,14 +19,33 @@ def heuristic_match(job: JobRecord, profile: Profile, minimum_score: int = 7) ->
     text = f"{job.title} {job.description}".lower()
     skills = _terms(profile)
     matching = sorted(skill for skill in skills if re.search(r"\b" + re.escape(skill) + r"\b", text))
-    mentioned = set(re.findall(r"\b[a-z][a-z0-9+#.-]{1,30}\b", text))
     preferred_missing = sorted(skill for skill in skills if skill not in matching)
-    remote_ok = "remote" in text or "work from home" in text
+    remote_ok = "remote" in text or "work from home" in text or bool(job.remote_eligibility and job.remote_eligibility != "not specified")
     score = min(10, max(1, round(4 + len(matching) / max(1, len(skills)) * 4 + (1 if remote_ok else 0))))
     if not profile.verified:
         score = min(score, 6)
     concerns = [] if remote_ok else ["Remote eligibility is not explicit"]
-    return MatchResult(match_score=score, should_apply=score >= minimum_score and profile.verified, job_level="Entry Level" if any(x in text for x in ("entry", "junior", "intern")) else "Not specified", remote_eligibility="Remote; geographic eligibility requires review" if remote_ok else "Not specified", matching_skills=matching, missing_skills=preferred_missing[:12], experience_match="Profile-grounded heuristic match", strengths=matching[:8], concerns=concerns, reasoning="Matched only terms present in the verified profile; scraped job text was treated as untrusted data.", recommended_resume_focus=matching[:8])
+    return MatchResult(
+        match_score=score,
+        should_apply=score >= minimum_score and profile.verified,
+        job_level="Entry Level" if any(x in text for x in ("entry", "junior", "intern")) else "Not specified",
+        remote_eligibility=job.remote_eligibility or ("Remote; geographic eligibility requires review" if remote_ok else "Not specified"),
+        shift_type=job.shift_type or "Unknown",
+        work_hours=job.work_hours or "",
+        expected_overlap=job.expected_overlap or "",
+        salary=job.salary or "",
+        salary_classification=job.salary_classification or "Unknown",
+        currency=job.currency or "USD",
+        frequency=job.frequency or "yearly",
+        employment_type=job.employment_type or "Unknown",
+        matching_skills=matching,
+        missing_skills=preferred_missing[:12],
+        experience_match="Profile-grounded heuristic match",
+        strengths=matching[:8],
+        concerns=concerns,
+        reasoning="Matched only terms present in the verified profile; scraped job text was treated as untrusted data.",
+        recommended_resume_focus=matching[:8]
+    )
 
 
 class JobMatcher:

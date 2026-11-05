@@ -8,6 +8,14 @@ class MatchResult(BaseModel):
     should_apply: bool
     job_level: str = "Unknown"
     remote_eligibility: str = "Unknown"
+    shift_type: str = "Unknown"
+    work_hours: str = ""
+    expected_overlap: str = ""
+    salary: str = ""
+    salary_classification: str = "Unknown"
+    currency: str = "USD"
+    frequency: str = "yearly"
+    employment_type: str = "Unknown"
     matching_skills: list[str] = []
     missing_skills: list[str] = []
     experience_match: str = ""

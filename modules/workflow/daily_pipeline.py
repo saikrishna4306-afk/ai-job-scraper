@@ -47,8 +47,15 @@ def _adapters(settings: Settings) -> list:
 
 
 def _job_record(job: Job) -> JobRecord:
-    required = json.loads(job.required_skills_json or "[]") if job.required_skills_json.startswith("[") else []
-    return JobRecord(title=job.title, company=job.company, description=job.description, application_url=job.application_url, source_name=job.source_name, external_id=job.external_id, required_skills=required, location=job.location, remote_eligibility=job.remote_eligibility)
+    required = json.loads(job.required_skills_json or "[]") if job.required_skills_json and job.required_skills_json.startswith("[") else []
+    return JobRecord(
+        title=job.title, company=job.company, description=job.description, application_url=job.application_url,
+        source_name=job.source_name, external_id=job.external_id, required_skills=required, location=job.location,
+        country=job.country, remote_eligibility=job.remote_eligibility, shift_type=job.shift_type,
+        work_hours=job.work_hours, expected_overlap=job.expected_overlap, salary=job.salary,
+        salary_classification=job.salary_classification, currency=job.currency, frequency=job.frequency,
+        employment_type=job.employment_type, experience_requirements=job.experience_requirements
+    )
 
 
 class DailyPipeline:
