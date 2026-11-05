@@ -1,0 +1,22 @@
+{
+  "remote_only": true,
+  "worldwide_remote": false,
+  "india_remote": true,
+  "hybrid_allowed": false,
+  "onsite_allowed": false,
+  "target_job_titles": ["Python Developer", "Backend Developer", "Software Engineer"],
+  "preferred_technologies": ["Python", "Django", "FastAPI", "SQL", "React"],
+  "experience_level": ["Internship", "Entry Level", "Junior"],
+  "fresher_jobs": true,
+  "internships": true,
+  "entry_level": true,
+  "salary_preferences": {},
+  "preferred_countries": ["India"],
+  "excluded_countries": [],
+  "excluded_companies": [],
+  "minimum_match_score": 7,
+  "maximum_jobs_per_platform": 20,
+  "job_lookback_hours": 24,
+  "preferred_employment_type": ["Full-time", "Internship"],
+  "enabled_sources": ["remoteok", "weworkremotely", "greenhouse", "lever", "ashby", "custom"]
+}
